@@ -1,0 +1,47 @@
+version: "2"
+
+services:
+  sonarqube:
+    image: sjatgutzmann/docker.centos.sonarqube
+    ports:
+      - "9000:9000"
+#    networks:
+#      - sonarnet
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonar
+    volumes:
+      # -/opt/sonarqube-6.1/web
+      - sonarqube_conf:/opt/sonarqube-6.1/conf
+      - sonarqube_data:/opt/sonarqube-6.1/data
+      - sonarqube_extensions:/opt/sonarqube-6.1/extensions
+      - sonarqube_bundled-plugins:/opt/sonarqube-6.1/lib/bundled-plugins
+    depends_on:
+      - db
+
+  db:
+    image: sjatgutzmann/docker.centos.postgres
+#    networks:
+#      - sonarnet
+    environment:
+      - PG_CREATE_USER=sonar
+      - PG_CREATE_PASSWORD=sonar
+      - PG_CREATE_DB=sonar
+      #- POSTGRES_PASSWORD=sonar
+    volumes:
+      #- postgresql:/var/lib/postgresql
+      - postgres4sonar:/var/log/postgres
+      # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      # - postgresql_data:/var/lib/postgresql/data
+      - pgdata4sonar:/var/lib/pgsql/9.3/data
+
+#networks:
+#  sonarnet:
+#    driver: bridge
+
+volumes:
+  sonarqube_conf:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_bundled-plugins:
+  postgres4sonar:
+  pgdata4sonar:
